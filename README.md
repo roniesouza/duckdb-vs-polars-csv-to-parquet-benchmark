@@ -123,6 +123,13 @@ Considerando que **menor é melhor** para tempo e tamanho, neste dataset e nesta
  - RAM: 16 GB
  - Armazenamento: SSD NVMe
 
+## 📄 Licença
+
+Este projeto está licenciado sob a **MIT License**.  
+Consulte o arquivo `LICENSE` para os detalhes.
+
+> Observação: o dataset usado no benchmark (Kaggle) possui termos/licença próprios e independentes desta licença do código.
+
 ## 📚 Referências
 
 - DuckDB: https://duckdb.org/
