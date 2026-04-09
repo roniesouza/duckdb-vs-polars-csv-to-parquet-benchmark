@@ -3,7 +3,8 @@
 Este repositório compara **DuckDB** e **Polars** em um cenário simples e prático:
 converter um CSV grande para Parquet e medir **tempo de escrita**, **tempo de leitura** e **tamanho final do arquivo**.
 
-O objetivo é educacional. Não é um veredito geral sobre qual ferramenta é “melhor” em todos os casos.
+Existem diversos outros pontos que podem ser observados e testados (como uso de memória, CPU, filtros, agregações e diferentes estratégias de leitura/escrita), mas o foco deste benchmark foi exatamente esse recorte que executamos.
+O objetivo é educacional e não representa um veredito geral sobre qual ferramenta é “melhor” em todos os casos.
 
 ## 🧾 Sobre o script
 
