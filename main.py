@@ -11,65 +11,65 @@ DUCK_OUT = "duckdb.parquet"
 POLARS_OUT = "polars.parquet"
 
 
-def benchmark_duckdb():
-    write_times = []
-    read_times = []
-    file_sizes = []
+def run_duckdb_once():
+    if os.path.exists(DUCK_OUT):
+        os.remove(DUCK_OUT)
+
+    start = time.perf_counter()
+    with duckdb.connect() as con:
+        con.execute(f"""
+            COPY (
+                SELECT * FROM read_csv_auto('{CSV_PATH}')
+            ) TO '{DUCK_OUT}' (FORMAT PARQUET, COMPRESSION 'snappy')
+        """)
+    write_time = time.perf_counter() - start
+
+    file_size = os.path.getsize(DUCK_OUT) / (1024 * 1024)
+
+    start = time.perf_counter()
+    with duckdb.connect() as con:
+        con.execute(f"SELECT SUM(user_id) FROM read_parquet('{DUCK_OUT}')").fetchone()
+    read_time = time.perf_counter() - start
+
+    return write_time, read_time, file_size
+
+
+def run_polars_once():
+    if os.path.exists(POLARS_OUT):
+        os.remove(POLARS_OUT)
+
+    start = time.perf_counter()
+    (
+        pl.scan_csv(CSV_PATH)
+        .sink_parquet(POLARS_OUT, compression="snappy")
+    )
+    write_time = time.perf_counter() - start
+
+    file_size = os.path.getsize(POLARS_OUT) / (1024 * 1024)
+
+    start = time.perf_counter()
+    pl.scan_parquet(POLARS_OUT).select(pl.col("user_id").sum()).collect()
+    read_time = time.perf_counter() - start
+
+    return write_time, read_time, file_size
+
+
+def benchmark_alternating():
+    duck = {"write_times": [], "read_times": [], "file_sizes": []}
+    polars = {"write_times": [], "read_times": [], "file_sizes": []}
 
     for i in range(REPEATS):
-        if os.path.exists(DUCK_OUT):
-            os.remove(DUCK_OUT)
+        duck_write, duck_read, duck_size = run_duckdb_once()
+        duck["write_times"].append(duck_write)
+        duck["read_times"].append(duck_read)
+        duck["file_sizes"].append(duck_size)
 
-        start = time.perf_counter()
-        with duckdb.connect() as con:
-            con.execute(f"""
-                COPY (
-                    SELECT * FROM read_csv_auto('{CSV_PATH}')
-                ) TO '{DUCK_OUT}' (FORMAT PARQUET, COMPRESSION 'snappy')
-            """)
-        write_times.append(time.perf_counter() - start)
+        polars_write, polars_read, polars_size = run_polars_once()
+        polars["write_times"].append(polars_write)
+        polars["read_times"].append(polars_read)
+        polars["file_sizes"].append(polars_size)
 
-        file_sizes.append(os.path.getsize(DUCK_OUT) / (1024 * 1024))
-
-        start = time.perf_counter()
-        with duckdb.connect() as con:
-            con.execute(f"SELECT SUM(user_id) FROM read_parquet('{DUCK_OUT}')").fetchone()
-        read_times.append(time.perf_counter() - start)
-
-    return {
-        "write_times": write_times,
-        "read_times": read_times,
-        "file_sizes": file_sizes,
-    }
-
-
-def benchmark_polars():
-    write_times = []
-    read_times = []
-    file_sizes = []
-
-    for i in range(REPEATS):
-        if os.path.exists(POLARS_OUT):
-            os.remove(POLARS_OUT)
-
-        start = time.perf_counter()
-        (
-            pl.scan_csv(CSV_PATH)
-            .sink_parquet(POLARS_OUT, compression="snappy")
-        )
-        write_times.append(time.perf_counter() - start)
-
-        file_sizes.append(os.path.getsize(POLARS_OUT) / (1024 * 1024))
-
-        start = time.perf_counter()
-        pl.scan_parquet(POLARS_OUT).select(pl.col("user_id").sum()).collect()
-        read_times.append(time.perf_counter() - start)
-
-    return {
-        "write_times": write_times,
-        "read_times": read_times,
-        "file_sizes": file_sizes,
-    }
+    return duck, polars
 
 
 def avg(values):
@@ -87,8 +87,7 @@ def show_result(name, result):
     print(f"  Média tamanho: {avg(result['file_sizes']):.2f} MB")
 
 
-duck = benchmark_duckdb()
-polars = benchmark_polars()
+duck, polars = benchmark_alternating()
 
 show_result("DuckDB", duck)
 show_result("Polars", polars)

@@ -92,43 +92,44 @@ Arquivos de saída esperados:
 
 | Métrica | DuckDB 🦆 | Polars 🐻‍❄️ |
 | --- | ---: | ---: |
-| Média de escrita | 75.1811s | **70.9118s** |
-| Média de leitura | **0.5891s** | 0.9952s |
-| Média de tamanho | **1441.37 MB** | 1596.53 MB |
+| Média de escrita | 72.6091s | **65.2019s** |
+| Média de leitura | **0.2495s** | 1.1116s |
+| Média de tamanho | **1441.22 MB** | 1596.53 MB |
 
-Considerando que **menor é melhor** para tempo e tamanho, nesta rodada o **Polars** foi **5.68% mais rápido na escrita**. Em contrapartida, o **DuckDB** foi **40.81% mais rápido na leitura** (aprox. **1.69x**) e gerou arquivo **9.72% menor**.
-Na análise das execuções do Polars, a **primeira carga e a primeira leitura** ficaram acima das demais (`116.1837s` e `2.8842s`), enquanto as repetições seguintes ficaram em patamar menor, sugerindo um efeito inicial de aquecimento/estabilização do ambiente.
-
+Considerando que **menor é melhor** para tempo e tamanho, nesta execução alternada o **Polars** foi **10.20% mais rápido na escrita**. Em contrapartida, o **DuckDB** foi **77.55% mais rápido na leitura** (aprox. **4.46x**) e gerou arquivo **9.73% menor**.
+No Polars, a **primeira escrita** (`91.5338s`) e a **primeira leitura** (`1.2932s`) ficaram acima da maior parte das demais execuções; além disso, a **3ª leitura** teve um pico (`3.5508s`), indicando variabilidade entre rodadas.
+ 
 ### 🦆 DuckDB
 
-- Escrita: 76.4838s, 73.2865s, 71.0157s, 76.8969s, 78.2226s
-- Leitura: 0.7973s, 0.5429s, 0.0750s, 1.3744s, 0.1556s
-- Tamanho: 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.98 MB, 1441.22 MB
-- Média escrita: 75.1811s
-- Média leitura: 0.5891s
-- Média tamanho: 1441.37 MB
+- Escrita: 69.8735s, 69.0745s, 74.7388s, 73.0618s, 76.2969s
+- Leitura: 0.1127s, 0.0929s, 0.0937s, 0.2156s, 0.7324s
+- Tamanho: 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.22 MB
+- Média escrita: 72.6091s
+- Média leitura: 0.2495s
+- Média tamanho: 1441.22 MB
 
 ### 🐻‍❄️ Polars
 
-- Escrita: 116.1837s, 53.3307s, 77.4002s, 53.7433s, 53.9010s
-- Leitura: 2.8842s, 1.3653s, 0.2100s, 0.2196s, 0.2967s
+- Escrita: 91.5338s, 59.0673s, 58.6942s, 61.3255s, 55.3888s
+- Leitura: 1.2932s, 0.2215s, 3.5508s, 0.2335s, 0.2589s
 - Tamanho: 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB
-- Média escrita: 70.9118s
-- Média leitura: 0.9952s
+- Média escrita: 65.2019s
+- Média leitura: 1.1116s
 - Média tamanho: 1596.53 MB
 
 ## 🔭 Próximos passos
 
-Atualmente, o benchmark mede primeiro todas as rodadas de um engine e depois do outro. Isso pode introduzir viés por **cache do sistema operacional**, estado do **SSD** e aquecimento do ambiente.
-
-Para reduzir esse efeito, o ideal é alternar por repetição:
+Com a versão atual do script, as rodadas já são executadas de forma alternada:
 - DuckDB rodada 1 -> Polars rodada 1
 - DuckDB rodada 2 -> Polars rodada 2
 - DuckDB rodada 3 -> Polars rodada 3
 - DuckDB rodada 4 -> Polars rodada 4
 - DuckDB rodada 5 -> Polars rodada 5
 
-Sem essa alternância, o segundo engine pode executar em condições diferentes da primeira etapa e influenciar a comparação.
+Como refinamentos futuros, vale:
+- randomizar a ordem por rodada (às vezes Polars primeiro);
+- reportar desvio padrão junto com a média;
+- separar cenários de leitura "cold" e "warm" para reduzir viés de cache.
  
 ## 💻 Configuração da máquina de teste
 
