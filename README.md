@@ -7,8 +7,7 @@ O objetivo é educacional. Não é um veredito geral sobre qual ferramenta é �
 
 ## 🧾 Sobre o script
 
-O script do benchmark já está no projeto, no arquivo `main.py`.
-Por isso, ele não está duplicado neste README.
+O benchmark está implementado no arquivo `main.py`.
 
 ## 🗂️ Dataset
 
