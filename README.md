@@ -9,6 +9,7 @@ O objetivo é educacional e não representa um veredito geral sobre qual ferrame
 ## 🧾 Sobre o script
 
 O benchmark está implementado no arquivo `main.py`.
+Nele, as execuções já ocorrem de forma alternada por rodada (`DuckDB 1 -> Polars 1 -> DuckDB 2 -> Polars 2...`), reduzindo viés de comparação por ordem fixa.
 
 ## 🗂️ Dataset
 
@@ -117,20 +118,6 @@ No Polars, a **primeira escrita** (`91.5338s`) e a **primeira leitura** (`1.2932
 - Média leitura: 1.1116s
 - Média tamanho: 1596.53 MB
 
-## 🔭 Próximos passos
-
-Com a versão atual do script, as rodadas já são executadas de forma alternada:
-- DuckDB rodada 1 -> Polars rodada 1
-- DuckDB rodada 2 -> Polars rodada 2
-- DuckDB rodada 3 -> Polars rodada 3
-- DuckDB rodada 4 -> Polars rodada 4
-- DuckDB rodada 5 -> Polars rodada 5
-
-Como refinamentos futuros, vale:
-- randomizar a ordem por rodada (às vezes Polars primeiro);
-- reportar desvio padrão junto com a média;
-- separar cenários de leitura "cold" e "warm" para reduzir viés de cache.
- 
 ## 💻 Configuração da máquina de teste
 
  - Sistema operacional: Windows 11
