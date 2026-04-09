@@ -4,7 +4,7 @@ import statistics
 import duckdb
 import polars as pl
 
-CSV_PATH = "dados.csv"
+CSV_PATH = "train_extra_radiussmote.csv"
 REPEATS = 5
 
 DUCK_OUT = "duckdb.parquet"
