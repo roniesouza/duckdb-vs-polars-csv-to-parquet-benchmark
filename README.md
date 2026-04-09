@@ -117,6 +117,19 @@ Na análise das execuções do Polars, a **primeira carga e a primeira leitura**
 - Média leitura: 0.9952s
 - Média tamanho: 1596.53 MB
 
+## 🔭 Próximos passos
+
+Atualmente, o benchmark mede primeiro todas as rodadas de um engine e depois do outro. Isso pode introduzir viés por **cache do sistema operacional**, estado do **SSD** e aquecimento do ambiente.
+
+Para reduzir esse efeito, o ideal é alternar por repetição:
+- DuckDB rodada 1 -> Polars rodada 1
+- DuckDB rodada 2 -> Polars rodada 2
+- DuckDB rodada 3 -> Polars rodada 3
+- DuckDB rodada 4 -> Polars rodada 4
+- DuckDB rodada 5 -> Polars rodada 5
+
+Sem essa alternância, o segundo engine pode executar em condições diferentes da primeira etapa e influenciar a comparação.
+ 
 ## 💻 Configuração da máquina de teste
 
  - Sistema operacional: Windows 11
