@@ -92,28 +92,29 @@ Arquivos de saída esperados:
 
 | Métrica | DuckDB 🦆 | Polars 🐻‍❄️ |
 | --- | ---: | ---: |
-| Média de escrita | **51.8635s** | 95.7238s |
-| Média de leitura | **0.0395s** | 36.7030s |
-| Média de tamanho | **1441.41 MB** | 1596.53 MB |
+| Média de escrita | 75.1811s | **70.9118s** |
+| Média de leitura | **0.5891s** | 0.9952s |
+| Média de tamanho | **1441.37 MB** | 1596.53 MB |
 
-Considerando que **menor é melhor** para tempo e tamanho, neste dataset e nesta máquina o **DuckDB** foi **45.82% mais rápido** na escrita, **99.89% mais rápido** na leitura (aprox. **929x**) e gerou arquivo **9.72% menor**.
+Considerando que **menor é melhor** para tempo e tamanho, nesta rodada o **Polars** foi **5.68% mais rápido na escrita**. Em contrapartida, o **DuckDB** foi **40.81% mais rápido na leitura** (aprox. **1.69x**) e gerou arquivo **9.72% menor**.
+Na análise das execuções do Polars, a **primeira carga e a primeira leitura** ficaram acima das demais (`116.1837s` e `2.8842s`), enquanto as repetições seguintes ficaram em patamar menor, sugerindo um efeito inicial de aquecimento/estabilização do ambiente.
 
 ### 🦆 DuckDB
 
-- Escrita: 48.7263s, 49.5103s, 47.0658s, 54.4691s, 59.5458s
-- Leitura: 0.0499s, 0.0361s, 0.0336s, 0.0397s, 0.0382s
-- Tamanho: 1441.22 MB, 1442.16 MB, 1441.22 MB, 1441.22 MB, 1441.22 MB
-- Média escrita: 51.8635s
-- Média leitura: 0.0395s
-- Média tamanho: 1441.41 MB
+- Escrita: 76.4838s, 73.2865s, 71.0157s, 76.8969s, 78.2226s
+- Leitura: 0.7973s, 0.5429s, 0.0750s, 1.3744s, 0.1556s
+- Tamanho: 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.98 MB, 1441.22 MB
+- Média escrita: 75.1811s
+- Média leitura: 0.5891s
+- Média tamanho: 1441.37 MB
 
 ### 🐻‍❄️ Polars
 
-- Escrita: 50.4999s, 92.0701s, 91.9608s, 103.7149s, 140.3732s
-- Leitura: 21.8974s, 29.3362s, 48.3157s, 37.5252s, 46.4402s
+- Escrita: 116.1837s, 53.3307s, 77.4002s, 53.7433s, 53.9010s
+- Leitura: 2.8842s, 1.3653s, 0.2100s, 0.2196s, 0.2967s
 - Tamanho: 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB
-- Média escrita: 95.7238s
-- Média leitura: 36.7030s
+- Média escrita: 70.9118s
+- Média leitura: 0.9952s
 - Média tamanho: 1596.53 MB
 
 ## 💻 Configuração da máquina de teste
