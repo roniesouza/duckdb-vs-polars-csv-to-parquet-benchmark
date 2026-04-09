@@ -17,6 +17,9 @@ https://www.kaggle.com/datasets/anhtran10/lo-dataset
 
 No teste deste projeto, o arquivo usado foi `train_extra_radiussmote.csv`.
 
+> ⚠️ **Tamanho do CSV utilizado: ~16,9 GB**  
+> Esse volume é relevante para interpretar os resultados de performance deste benchmark.
+
 ## 🧰 Ferramentas utilizadas
 
 ### 🦆 DuckDB
