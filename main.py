@@ -33,7 +33,7 @@ def benchmark_duckdb():
 
         start = time.perf_counter()
         with duckdb.connect() as con:
-            con.execute(f"SELECT COUNT(*) FROM read_parquet('{DUCK_OUT}')").fetchone()
+            con.execute(f"SELECT SUM(user_id) FROM read_parquet('{DUCK_OUT}')").fetchone()
         read_times.append(time.perf_counter() - start)
 
     return {
@@ -53,14 +53,16 @@ def benchmark_polars():
             os.remove(POLARS_OUT)
 
         start = time.perf_counter()
-        df = pl.read_csv(CSV_PATH)
-        df.write_parquet(POLARS_OUT, compression="snappy")
+        (
+            pl.scan_csv(CSV_PATH)
+            .sink_parquet(POLARS_OUT, compression="snappy")
+        )
         write_times.append(time.perf_counter() - start)
 
         file_sizes.append(os.path.getsize(POLARS_OUT) / (1024 * 1024))
 
         start = time.perf_counter()
-        pl.read_parquet(POLARS_OUT).height
+        pl.scan_parquet(POLARS_OUT).select(pl.col("user_id").sum()).collect()
         read_times.append(time.perf_counter() - start)
 
     return {
