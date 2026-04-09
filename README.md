@@ -93,29 +93,30 @@ Arquivos de saída esperados:
 
 | Métrica | DuckDB 🦆 | Polars 🐻‍❄️ |
 | --- | ---: | ---: |
-| Média de escrita | 72.6091s | **65.2019s** |
-| Média de leitura | **0.2495s** | 1.1116s |
-| Média de tamanho | **1441.22 MB** | 1596.53 MB |
+| Média de escrita | **49.2535s** | 60.9733s |
+| Média de leitura | **0.7057s** | 0.9280s |
+| Média de tamanho | **1458.98 MB** | 1596.53 MB |
 
-Considerando que **menor é melhor** para tempo e tamanho, nesta execução alternada o **Polars** foi **10.20% mais rápido na escrita**. Em contrapartida, o **DuckDB** foi **77.55% mais rápido na leitura** (aprox. **4.46x**) e gerou arquivo **9.73% menor**.
-No Polars, a **primeira escrita** (`91.5338s`) e a **primeira leitura** (`1.2932s`) ficaram acima da maior parte das demais execuções; além disso, a **3ª leitura** teve um pico (`3.5508s`), indicando variabilidade entre rodadas.
+Considerando que **menor é melhor** para tempo e tamanho, nesta execução alternada o **DuckDB** foi **19.22% mais rápido na escrita** (aprox. **1.24x**), **23.95% mais rápido na leitura** (aprox. **1.31x**) e gerou arquivo **8.62% menor**.
+Na escrita, o DuckDB ficou mais estável (de `47.7623s` a `50.6153s`), enquanto o Polars mostrou queda progressiva após a 1ª rodada (`71.2344s` para a faixa de `55-58s`), sugerindo efeito de aquecimento.
+Na leitura, ambos tiveram picos isolados: DuckDB na **4ª leitura** (`1.7089s`) e Polars na **1ª leitura** (`3.2355s`), com as demais rodadas bem menores.
  
 ### 🦆 DuckDB
 
-- Escrita: 69.8735s, 69.0745s, 74.7388s, 73.0618s, 76.2969s
-- Leitura: 0.1127s, 0.0929s, 0.0937s, 0.2156s, 0.7324s
-- Tamanho: 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.22 MB, 1441.22 MB
-- Média escrita: 72.6091s
-- Média leitura: 0.2495s
-- Média tamanho: 1441.22 MB
+- Escrita: 47.7623s, 47.9389s, 49.4063s, 50.5447s, 50.6153s
+- Leitura: 1.1611s, 0.4066s, 0.0852s, 1.7089s, 0.1668s
+- Tamanho: 1458.89 MB, 1459.13 MB, 1459.28 MB, 1459.02 MB, 1458.57 MB
+- Média escrita: 49.2535s
+- Média leitura: 0.7057s
+- Média tamanho: 1458.98 MB
 
 ### 🐻‍❄️ Polars
 
-- Escrita: 91.5338s, 59.0673s, 58.6942s, 61.3255s, 55.3888s
-- Leitura: 1.2932s, 0.2215s, 3.5508s, 0.2335s, 0.2589s
+- Escrita: 71.2344s, 64.1465s, 56.0259s, 55.8336s, 57.6260s
+- Leitura: 3.2355s, 0.3895s, 0.3446s, 0.2952s, 0.3754s
 - Tamanho: 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB
-- Média escrita: 65.2019s
-- Média leitura: 1.1116s
+- Média escrita: 60.9733s
+- Média leitura: 0.9280s
 - Média tamanho: 1596.53 MB
 
 ## 💻 Configuração da máquina de teste

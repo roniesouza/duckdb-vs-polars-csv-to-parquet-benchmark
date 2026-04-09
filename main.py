@@ -17,6 +17,7 @@ def run_duckdb_once():
 
     start = time.perf_counter()
     with duckdb.connect() as con:
+        con.execute("SET preserve_insertion_order = false;")
         con.execute(f"""
             COPY (
                 SELECT * FROM read_csv_auto('{CSV_PATH}')
@@ -41,7 +42,7 @@ def run_polars_once():
     start = time.perf_counter()
     (
         pl.scan_csv(CSV_PATH)
-        .sink_parquet(POLARS_OUT, compression="snappy")
+        .sink_parquet(POLARS_OUT, compression="snappy", maintain_order=False)
     )
     write_time = time.perf_counter() - start
 
