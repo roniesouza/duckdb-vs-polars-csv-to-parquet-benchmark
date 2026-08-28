@@ -10,6 +10,6 @@ wheels/
 .venv
 
 # Data
-train_extra_radiussmote.csv
-duckdb.parquet
-polars.parquet
+data/
+*.csv
+*.csv.tmp

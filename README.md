@@ -1,141 +1,164 @@
-# 🚀 Benchmark: CSV para Parquet com DuckDB  vs Polars
+# Benchmark: CSV para Parquet com DuckDB e Polars
 
-Este repositório compara **DuckDB** e **Polars** em um cenário simples e prático:
-converter um CSV grande para Parquet e medir **tempo de escrita**, **tempo de leitura** e **tamanho final do arquivo**.
+Este projeto compara DuckDB e Polars na conversão de um CSV grande para
+Parquet. Ele mede o tempo de escrita, o tempo de leitura e o tamanho final do
+arquivo, sem depender de datasets ou serviços externos.
 
-Existem diversos outros pontos que podem ser observados e testados (como uso de memória, CPU, filtros, agregações e diferentes estratégias de leitura/escrita), mas o foco deste benchmark foi exatamente esse recorte que executamos.
-O objetivo é educacional e não representa um veredito geral sobre qual ferramenta é “melhor” em todos os casos.
+O objetivo é educacional. O resultado representa este cenário específico e
+não determina qual ferramenta é melhor para todo tipo de carga de trabalho.
 
-## 🧾 Sobre o script
+## Dataset local
 
-O benchmark está implementado no arquivo `main.py`.
-Nele, as execuções já ocorrem de forma alternada por rodada (`DuckDB 1 -> Polars 1 -> DuckDB 2 -> Polars 2...`), reduzindo viés de comparação por ordem fixa.
+Na primeira execução, o projeto gera `data/people.csv` com 340 milhões de
+registros sintéticos. O arquivo deve ficar próximo de 20 GB, mas o tamanho pode
+variar. As execuções seguintes reutilizam esse arquivo.
 
-## 🗂️ Dataset
+Cada registro tem as colunas `user_id`, `name`, `email`, `city` e `state`. A
+geração é feita pelo DuckDB antes do cronômetro do benchmark e grava primeiro
+em um arquivo temporário, evitando que uma geração interrompida seja tomada
+como completa.
 
-Dataset utilizado (Kaggle):
-https://www.kaggle.com/datasets/anhtran10/lo-dataset
+O volume exige espaço para o CSV e para os dois arquivos Parquet. Verifique o
+espaço livre antes de executar o benchmark completo.
 
-No teste deste projeto, o arquivo usado foi `train_extra_radiussmote.csv`.
+## Requisitos
 
-> ⚠️ **Tamanho do CSV utilizado: ~16,9 GB**  
-> Esse volume é relevante para interpretar os resultados de performance deste benchmark.
+- Python 3.13, conforme `.python-version`;
+- [uv](https://docs.astral.sh/uv/);
+- espaço em disco compatível com o dataset e os arquivos de saída.
 
-## 🧰 Ferramentas utilizadas
+## Execução
 
-### 🦆 DuckDB
-
-O DuckDB é um banco analítico SQL embutido, muito forte para processar dados localmente com consultas SQL.
-
-Mais indicado para:
-- Exploração analítica rápida em arquivos grandes (CSV/Parquet)
-- Pipelines locais de ETL/ELT com SQL
-- Cenários em que você quer alta performance sem subir um servidor de banco
-
-### 🐻‍❄️ Polars
-
-O Polars é uma biblioteca de DataFrame colunar (com engine em Rust), focada em alta performance no ecossistema Python.
-
-Mais indicado para:
-- Transformações tabulares em pipelines Python
-- Fluxos com DataFrames e operações vetorizadas
-- Casos que se beneficiam de processamento eficiente e API moderna
-
-### ⚡ uv (Astral)
-
-O `uv` é o gerenciador de ambiente e dependências usado neste projeto.
-Ele simplifica a reprodução do ambiente com rapidez e consistência.
-
-## 🔢 Versões das bibliotecas (neste teste)
-
-- 🦆 DuckDB: `1.5.1` (travado no `uv.lock`)
-- 🐻‍❄️ Polars: `1.39.3` (travado no `uv.lock`)
-
-## ✅ Requisitos
-
-- Python 3.13 (arquivo `.python-version`)
-- `uv` instalado
-
-Instalação do `uv`:
-https://docs.astral.sh/uv/
-
-## 🔁 Como replicar com uv
-
-1. Clone este repositório.
-2. Baixe o dataset no Kaggle e coloque o CSV na raiz do projeto.
-3. Garanta que o nome/caminho do CSV em `main.py` esteja correto na variável `CSV_PATH`.
-4. Instale as dependências:
+Instale o ambiente e execute:
 
 ```bash
 uv sync
-```
-
-5. Execute o benchmark:
-
-```bash
 uv run python main.py
 ```
 
-Arquivos de saída esperados:
-- `duckdb.parquet`
-- `polars.parquet`
+Na primeira vez, o comando gera o dataset, executa uma rodada de aquecimento
+fora das estatísticas e depois inicia quatro rodadas medidas. Ao final,
+permanecem disponíveis:
 
-## 📏 O que o benchmark mede
+- `data/people.csv`;
+- `data/duckdb.parquet`;
+- `data/polars.parquet`.
 
-- Tempo de escrita (CSV -> Parquet)
-- Tempo de leitura (Parquet)
-- Tamanho final do Parquet
-- Média de 5 repetições
+Para descartar o CSV existente e criá-lo novamente:
 
-## 🏁 Resultados obtidos
+```bash
+uv run python main.py --regenerate
+```
 
-### 📊 Resumo das médias
+Também é possível gerar somente o dataset:
 
-| Métrica | DuckDB 🦆 | Polars 🐻‍❄️ |
-| --- | ---: | ---: |
-| Média de escrita | **49.2535s** | 60.9733s |
-| Média de leitura | **0.7057s** | 0.9280s |
-| Média de tamanho | **1458.98 MB** | 1596.53 MB |
+```bash
+uv run python gerador_dados.py
+```
 
-Considerando que **menor é melhor** para tempo e tamanho, nesta execução alternada o **DuckDB** foi **19.22% mais rápido na escrita** (aprox. **1.24x**), **23.95% mais rápido na leitura** (aprox. **1.31x**) e gerou arquivo **8.62% menor**.
-Na escrita, o DuckDB ficou mais estável (de `47.7623s` a `50.6153s`), enquanto o Polars mostrou queda progressiva após a 1ª rodada (`71.2344s` para a faixa de `55-58s`), sugerindo efeito de aquecimento.
-Na leitura, ambos tiveram picos isolados: DuckDB na **4ª leitura** (`1.7089s`) e Polars na **1ª leitura** (`3.2355s`), com as demais rodadas bem menores.
- 
-### 🦆 DuckDB
+## Parâmetros de execução
 
-- Escrita: 47.7623s, 47.9389s, 49.4063s, 50.5447s, 50.6153s
-- Leitura: 1.1611s, 0.4066s, 0.0852s, 1.7089s, 0.1668s
-- Tamanho: 1458.89 MB, 1459.13 MB, 1459.28 MB, 1459.02 MB, 1458.57 MB
-- Média escrita: 49.2535s
-- Média leitura: 0.7057s
-- Média tamanho: 1458.98 MB
+Todos os parâmetros são opcionais. Consulte a ajuda diretamente no terminal:
 
-### 🐻‍❄️ Polars
+```bash
+uv run python main.py --help
+uv run python gerador_dados.py --help
+```
 
-- Escrita: 71.2344s, 64.1465s, 56.0259s, 55.8336s, 57.6260s
-- Leitura: 3.2355s, 0.3895s, 0.3446s, 0.2952s, 0.3754s
-- Tamanho: 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB, 1596.53 MB
-- Média escrita: 60.9733s
-- Média leitura: 0.9280s
-- Média tamanho: 1596.53 MB
+### `main.py`
 
-## 💻 Configuração da máquina de teste
+| Parâmetro | Padrão | Descrição |
+| --- | --- | --- |
+| `--csv CAMINHO` | `data/people.csv` | CSV usado pelas duas ferramentas. Se não existir, será gerado. |
+| `--rows N` | `340000000` | Registros criados quando o CSV não existe ou quando `--regenerate` é usado. Não limita um CSV existente. |
+| `--repeats N` | `4` | Rodadas medidas. Em cada rodada, DuckDB e Polars são executados uma vez. |
+| `--warmups N` | `1` | Rodadas de aquecimento descartadas das estatísticas. Use `0` para desativar. |
+| `--regenerate` | desativado | Substitui o CSV indicado por `--csv` antes do benchmark. |
 
- - Sistema operacional: Windows 11
- - CPU: Intel Core i5-1135G7 (4 núcleos / 8 threads)
- - RAM: 16 GB
- - Armazenamento: SSD NVMe
+Para executar somente uma rodada usando o dataset padrão existente:
 
-## 📄 Licença
+```bash
+uv run python main.py --repeats 1
+```
 
-Este projeto está licenciado sob a **MIT License**.  
-Consulte o arquivo `LICENSE` para os detalhes.
+Se `data/people.csv` ainda não existir, esse comando gera os 340 milhões de
+registros antes do aquecimento e da rodada medida. Alterar `--repeats` ou
+`--warmups` não altera o tamanho do dataset.
 
-> Observação: o dataset usado no benchmark (Kaggle) possui termos/licença próprios e independentes desta licença do código.
+Quatro rodadas medidas mantêm o tempo total razoável e equilibram a ordem: cada
+ferramenta inicia duas vezes. Para uma análise mais longa, aumente
+`--repeats`; prefira sempre um número par.
 
-## 📚 Referências
+### `gerador_dados.py`
 
-- DuckDB: https://duckdb.org/
-- Polars: https://pola.rs/
-- uv (Astral): https://docs.astral.sh/uv/
-- Dataset (Kaggle): https://www.kaggle.com/datasets/anhtran10/lo-dataset
+| Parâmetro | Padrão | Descrição |
+| --- | --- | --- |
+| `--output CAMINHO` | `data/people.csv` | Caminho do CSV que será criado ou reutilizado. |
+| `--rows N` | `340000000` | Quantidade de registros gerados. |
+| `--force` | desativado | Substitui o CSV caso ele já exista. |
+
+Esse script apenas gera ou reutiliza o CSV; ele não executa o benchmark.
+
+## Teste com volume reduzido
+
+Para validar o ambiente sem criar o arquivo completo, use outro caminho. O
+argumento `--rows` só é considerado quando o CSV precisa ser gerado.
+
+```bash
+uv run python main.py --csv data/smoke.csv --rows 100000 --repeats 1 --regenerate
+```
+
+Se o caminho informado já existir, ele será reutilizado. Use `--regenerate`
+para substituí-lo com a quantidade de registros solicitada.
+
+## Observabilidade
+
+Os dois scripts emitem logs com data, nível, componente e eventos estáveis no
+formato `event=...`, acompanhados por campos em pares chave/valor. A geração
+registra início, reutilização, conclusão ou falha, além de caminho, registros,
+tamanho, duração e throughput. O benchmark registra configuração e versões,
+ordem das rodadas, início e fim de cada ferramenta, métricas, resumo e falhas.
+
+Não há logs por registro, e os logs de cada ferramenta ficam fora das janelas
+cronometradas para não interferirem nas métricas.
+
+Ao final, `main.py` apresenta um relatório separado dos logs, com média,
+mediana, desvio padrão amostral, destaque pela mediana, diferença percentual,
+quantidade de aquecimentos e rodadas, além dos caminhos dos Parquets. Com uma
+única rodada medida, o desvio padrão aparece como `n/a`. A saída usa UTF-8 para
+preservar acentos no terminal do Windows.
+
+## Metodologia
+
+Antes das medições, cada ferramenta executa uma vez para aquecer inicialização,
+alocadores e cache. O início e a conclusão são observáveis nos logs, mas seus
+tempos não aparecem no relatório nem entram nas estatísticas.
+
+Cada rodada medida converte o mesmo CSV para Parquet com compressão Snappy. Em
+seguida, cada ferramenta lê seu próprio Parquet e calcula a soma de `user_id`,
+forçando uma operação sobre os dados. A ordem de início é invertida a cada
+rodada: `DuckDB -> Polars` e depois `Polars -> DuckDB`.
+
+A geração do CSV e o aquecimento não entram nas métricas. O benchmark apresenta
+os valores de cada rodada, média, mediana e desvio padrão amostral de:
+
+- tempo de escrita de CSV para Parquet;
+- tempo de leitura e agregação do Parquet;
+- tamanho do Parquet em MiB.
+
+Feche aplicações que disputem CPU, memória ou disco e use a mesma máquina e as
+mesmas versões ao comparar resultados. Cache do sistema operacional,
+temperatura, processos em segundo plano e características do hardware podem
+afetar as medições.
+
+## Tecnologias
+
+- [DuckDB](https://duckdb.org/): banco analítico SQL embutido;
+- [Polars](https://pola.rs/): biblioteca de DataFrame colunar;
+- [uv](https://docs.astral.sh/uv/): ambiente e dependências reproduzíveis.
+
+As versões resolvidas estão registradas em `uv.lock`.
+
+## Licença
+
+Este projeto está licenciado sob a MIT License. Consulte `LICENSE`.
